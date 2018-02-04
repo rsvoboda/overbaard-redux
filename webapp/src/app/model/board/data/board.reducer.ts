@@ -93,6 +93,8 @@ export function boardReducer(state: BoardState = initialBoardState, action: Acti
       return initialBoardState;
     }
     case DESERIALIZE_BOARD: {
+      const start = new Date().getTime();
+      console.log(`Deserializing board start: ${start}`);
       const dbAction: DeserializeBoardAction = <DeserializeBoardAction>action;
       const input = dbAction.payload;
       const viewId: number = input['view'];
@@ -151,7 +153,7 @@ export function boardReducer(state: BoardState = initialBoardState, action: Acti
       const blacklistState: BlacklistState =
         metaReducers.blacklist(state.blacklist, BlacklistActions.createDeserializeBlacklist(input['blacklist']));
 
-      return BoardUtil.withMutations(state, mutable => {
+      const newState: BoardState =  BoardUtil.withMutations(state, mutable => {
         mutable.viewId = viewId;
         mutable.currentUser = input['current-user'];
         mutable.rankCustomFieldId = rankCustomFieldId;
@@ -169,6 +171,9 @@ export function boardReducer(state: BoardState = initialBoardState, action: Acti
         mutable.ranks = rankState;
         mutable.blacklist = blacklistState;
       });
+
+      console.log(`Time to deserialize board took ${new Date().getTime() - start}ms and it has ${newState.issues.issues.size} issues`);
+      return newState;
     }
     case PROCESS_BOARD_CHANGES: {
       const input: any = (<ProcessBoardChangesAction>action).payload;

@@ -75,6 +75,8 @@ export class BoardViewModelHandler {
       if (boardState === initialBoardState || userSettingState === initialUserSettingState) {
         return this._lastBoardView;
       }
+      const start = new Date().getTime();
+      console.log(`Board view model start ${start}`);
 
       let changeType: ChangeType = null;
       if (boardState !== this._lastBoardState) {
@@ -124,6 +126,7 @@ export class BoardViewModelHandler {
       this._lastBoardState = boardState;
       this._lastUserSettingState = userSettingState;
       this._lastBoardView = boardView;
+      console.log(`Time to create board view took ${new Date().getTime() - start}ms`);
       return this._lastBoardView;
     });
   }
@@ -689,6 +692,19 @@ class IssueTableBuilder {
     this._visibleIssueCounts = List<number>(visibleIssues);
 
     this._table = tableBuilder.build();
+
+    // Temp  debug code
+    /*this._table = this._table.withMutations(mutable => {
+      this._table.forEach((state, i) => {
+        if (state.size > 10) {
+          mutable.set(i, List<string>(state.slice(0, 10)));
+        }
+      });
+    });*/
+
+    const total = this._table.reduce((sum, col) => sum += col.size, 0).valueOf();
+    console.log(`We have ${total} visible issues spread over ${this._table.size} states`);
+
     this._rankView = rankViewBuilder ? rankViewBuilder.getRankView() : initialIssueTable.rankView;
     return issues;
   }
